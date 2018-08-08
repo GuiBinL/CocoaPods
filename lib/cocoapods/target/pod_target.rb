@@ -419,15 +419,18 @@ module Pod
     # @return [Array<PodTarget>] the recursive targets that this target has a
     #         test dependency upon.
     #
-    def recursive_test_dependent_targets
-      @recursive_test_dependent_targets ||= _add_recursive_test_dependent_targets(Set.new).to_a
+    def recursive_test_dependent_targets(test_spec)
+      @recursive_test_dependent_targets ||= {}
+      @recursive_test_dependent_targets[test_spec] ||= _add_recursive_test_dependent_targets(test_spec, Set.new).to_a
     end
 
-    def _add_recursive_test_dependent_targets(set)
-      test_dependent_targets_by_spec_name.each_value do |dependent_targets|
-        dependent_targets.each do |target|
-          target._add_recursive_dependent_targets(set) if set.add?(target)
-        end
+    def _add_recursive_test_dependent_targets(test_spec, set)
+      raise ArgumentError, 'Must give a test spec' unless test_spec
+      # raise ArgumentError, "Attempting to add recursive test dependent targets for #{self} but #{test_spec} is not a known test spec!" unless dependent_targets = test_dependent_targets_by_spec_name[test_spec.name]
+      return unless dependent_targets = test_dependent_targets_by_spec_name[test_spec.name]
+
+      dependent_targets.each do |target|
+        target._add_recursive_dependent_targets(set) if set.add?(target)
       end
 
       set
@@ -440,7 +443,7 @@ module Pod
     #         This list includes the target itself as well as its recursive dependent and test dependent targets.
     #
     def dependent_targets_for_test_spec(test_spec)
-      [self, *recursive_dependent_targets, *test_dependent_targets_by_spec_name[test_spec.name]].uniq
+      [self, *recursive_dependent_targets, *recursive_test_dependent_targets(test_spec)].uniq
     end
 
     # Checks if warnings should be inhibited for this pod.
@@ -507,12 +510,12 @@ module Pod
     #
     # @return [Array<String>] The set of header search paths this target uses.
     #
-    def header_search_paths(include_test_dependent_targets = false)
+    def header_search_paths(include_dependent_targets_for_test_spec: nil)
       header_search_paths = []
       header_search_paths.concat(build_headers.search_paths(platform, nil, false))
       header_search_paths.concat(sandbox.public_headers.search_paths(platform, pod_name, uses_modular_headers?))
       dependent_targets = recursive_dependent_targets
-      dependent_targets += recursive_test_dependent_targets if include_test_dependent_targets
+      dependent_targets += recursive_test_dependent_targets(include_dependent_targets_for_test_spec) if include_dependent_targets_for_test_spec
       dependent_targets.uniq.each do |dependent_target|
         header_search_paths.concat(sandbox.public_headers.search_paths(platform, dependent_target.pod_name, defines_module? && dependent_target.uses_modular_headers?(false)))
       end
