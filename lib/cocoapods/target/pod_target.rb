@@ -214,7 +214,9 @@ module Pod
       tds_by_answer = explicit_target_definitions.group_by { |td| td.build_pod_as_module?(pod_name) }
 
       if tds_by_answer.size > 1
-        UI.warn "Ambiguous whether to build #{self} as a module.\n\t- #{tds_by_answer.map { |a, t| "#{t.to_sentence} say #{a ? 'to' : 'not to'}" }.join("\n\t- ")}\nNot building as a module."
+        UI.warn "Unable to determine whether to build `#{label}` as a module due to a conflict " \
+          "between the following target definitions: #{tds_by_answer.map { |_, td| "`#{td.to_sentence}`" }.join(', ')}. " \
+          "Defaulting to skip building `#{label}` as a module."
       elsif tds_by_answer.keys.first == true || target_definitions.all? { |td| td.build_pod_as_module?(pod_name) }
         return @defines_module = true
       end
