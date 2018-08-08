@@ -426,6 +426,9 @@ module Pod
     end
     protected :_add_recursive_dependent_targets
 
+    # @param [Specification] test_spec
+    #        the test spec to scope dependencies for
+    #
     # @return [Array<PodTarget>] the recursive targets that this target has a
     #         test dependency upon.
     #
@@ -447,6 +450,7 @@ module Pod
     private :_add_recursive_test_dependent_targets
 
     # @param [Specification] test_spec
+    #        the test spec to scope dependencies for
     #
     # @return [Array<PodTarget>] the canonical list of dependent targets this target has a dependency upon.
     #         This list includes the target itself as well as its recursive dependent and test dependent targets.
@@ -514,7 +518,7 @@ module Pod
       [version.major, version.minor, version.patch].join('.')
     end
 
-    # @param [Boolean] include_test_dependent_targets
+    # @param [Boolean] include_dependent_targets_for_test_spec
     #        whether to include header search paths for test dependent targets
     #
     # @return [Array<String>] The set of header search paths this target uses.
