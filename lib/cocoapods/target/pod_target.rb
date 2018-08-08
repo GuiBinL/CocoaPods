@@ -209,7 +209,15 @@ module Pod
     def defines_module?
       return @defines_module if defined?(@defines_module)
       return @defines_module = true if uses_swift? || requires_frameworks?
-      return @defines_module = true if target_definitions.all? { |td| td.build_pod_as_module?(pod_name) }
+
+      explicit_target_definitions = target_definitions.select { |td| td.dependencies.any? { |d| d.root_name == pod_name } }
+      tds_by_answer = explicit_target_definitions.group_by { |td| td.build_pod_as_module?(pod_name) }
+
+      if tds_by_answer.size > 1
+        UI.warn "Ambiguous whether to build #{self} as a module.\n\t- #{tds_by_answer.map { |a, t| "#{t.to_sentence} say #{a ? 'to' : 'not to'}" }.join("\n\t- ")}\nNot building as a module."
+      elsif tds_by_answer.keys.first == true || target_definitions.all? { |td| td.build_pod_as_module?(pod_name) }
+        return @defines_module = true
+      end
 
       @defines_module = non_test_specs.any? { |s| s.consumer(platform).pod_target_xcconfig['DEFINES_MODULE'] == 'YES' }
     end
