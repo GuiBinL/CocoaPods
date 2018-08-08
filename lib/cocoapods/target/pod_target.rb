@@ -436,7 +436,6 @@ module Pod
 
     def _add_recursive_test_dependent_targets(test_spec, set)
       raise ArgumentError, 'Must give a test spec' unless test_spec
-      # raise ArgumentError, "Attempting to add recursive test dependent targets for #{self} but #{test_spec} is not a known test spec!" unless dependent_targets = test_dependent_targets_by_spec_name[test_spec.name]
       return unless dependent_targets = test_dependent_targets_by_spec_name[test_spec.name]
 
       dependent_targets.each do |target|
