@@ -382,14 +382,13 @@ module Pod
               end
 
               it 'adds the resources bundles for to the copy resources script for test target' do
-                @watermelon_spec.test_specs.first.resource_bundle = { 'CoconutLibTestResources' => ['Tests/*.xib'] }
                 @installer.install!
                 script_path = @watermelon_pod_target.copy_resources_script_path_for_test_spec(@watermelon_spec.test_specs.first)
                 script = script_path.read
                 @watermelon_pod_target.user_build_configurations.keys.each do |configuration|
                   script.should.include <<-eos.strip_heredoc
         if [[ "$CONFIGURATION" == "#{configuration}" ]]; then
-          install_resource "${PODS_CONFIGURATION_BUILD_DIR}/CoconutLibTestResources.bundle"
+          install_resource "${PODS_CONFIGURATION_BUILD_DIR}/WatermelonLibTestResources.bundle"
         fi
                   eos
                 end
