@@ -337,7 +337,9 @@ module Pod
                   # Wire app host dependencies to test native target
                   test_spec_consumers = test_specs.map { |test_spec| test_spec.consumer(pod_target.platform) }
                   test_spec_consumers.select(&:requires_app_host?).each do |test_spec_consumer|
-                    _app_host_key, app_host_target = app_hosts_by_host_key.find { |key, _app_host| key.test_type == test_spec_consumer.test_type && key.platform.symbolic_name == pod_target.platform.symbolic_name }
+                    _app_host_key, app_host_target = app_hosts_by_host_key.find do |key, _app_host|
+                      key.test_type == test_spec_consumer.test_type && key.platform.symbolic_name == pod_target.platform.symbolic_name
+                    end
                     test_native_target.add_dependency(app_host_target)
                     configure_app_host_to_native_target(app_host_target, test_native_target)
                   end
