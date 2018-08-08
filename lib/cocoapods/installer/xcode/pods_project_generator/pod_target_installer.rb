@@ -427,8 +427,10 @@ module Pod
               end
 
               # also apply the private config to resource bundle test targets related to this test spec.
-              resource_bundle_native_targets = test_resource_bundle_targets[test_spec.name] || []
-              apply_xcconfig_file_ref_to_resource_bundle_targets(resource_bundle_native_targets, test_xcconfig_file_ref)
+              scoped_test_resource_bundle_targets = test_resource_bundle_targets[test_spec.name]
+              unless scoped_test_resource_bundle_targets.empty?
+                apply_xcconfig_file_ref_to_resource_bundle_targets(scoped_test_resource_bundle_targets, test_xcconfig_file_ref)
+              end
             end
           end
 
